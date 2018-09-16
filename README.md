@@ -1,4 +1,5 @@
 # simple-vigenere-cracker
+## overview
 A simple Go program that generates and tests all possible rotation keys for a Vigenere cipher using a key of length 5.  Originally used to be lazy about a university assignment.  This particular program is extremely inelegant and exploits a specific property of the given executable (the output of a success message given the correct key).  Without this your best bet would be to do some level of language processing or to use some kind of English confidence metric, which may increase complexity beyond a reasonable level.
 
 This program really served 2 purposes:
@@ -10,3 +11,6 @@ Given that my back of the envelope calculations put the maximum runtime on my la
 The script has since been updated to dynamically partition the set of all possible keys based on a variable that you can change to reflect how many cores you have to work with.  If I really get the urge to I'll probably modify the program to utilize some flavor of MPI in order to allow computation across multiple nodes.  That said, I do not currently have access to a cluster capable of running the assignment's executable (damn libgcrypt!) so testing will take some creative problem solving.
 
 **Note**: In most cases it's probably a lot more effective to just create sets of ciphertext characters based on the length of the key then just look at the occurences.  In most cases you can just map the most frequent letter to E and know the rotation of that column, rinse and repeat for the rest.  If you're given enough text to work with this should be fine and quick.
+
+## instructions
+Hey buddy, if you're here to use this on the project (you know if you're in the class this was assigned for) then go the hell away.  It's not difficult to collect the letters into 5 sets (or however many according to Vigenere key length) and do some frequency analysis to determine rotations.  We're probably going to have to do something similar on exams anyway, so using this is only going to get you a decent assignment grade (it's only 1/3 of the assignment anyway).  **Go get a piece of paper and a writing utensil and grind it out, this was created purely for my own enrichment, entertainment, and pseudo-laziness.  It's a fanciful and relatively pointless program!**
