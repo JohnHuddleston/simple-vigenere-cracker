@@ -8,8 +8,9 @@ import (
 	"sync"
 	)
 
-func test_keys(keyset []string, worker_id int) {
-	fmt.Println("Worker " + strconv.Itoa(worker_id) + " started.")
+func test_keys(keyset []string, worker_id int, completion_bus chan<- string) {
+	str_id := strconv.Itoa(worker_id)
+	fmt.Println("Worker " + str_id + " started.")
 	var keys_tested = 0
 	for _, key := range keyset {
 		command := strings.Split("/path/to/executable -d -i /path/to/input/ciphertext.txt -c vigenere -k " + key, " ")
@@ -21,11 +22,12 @@ func test_keys(keyset []string, worker_id int) {
 			fmt.Println(err)
 			fmt.Println(string(out))
 		} else if strings.Contains(string(out), "successfully") {
-			fmt.Println("KEY HAS BEEN FOUND: " + key)
+			fmt.Println("KEY HAS BEEN FOUND BY WORKER " + str_id)
+			completion_bus <- key
 			return
 		} else {
-			if keys_tested % 100000 == 0 {
-				fmt.Println(strconv.Itoa(keys_tested) + " keys tested by worker " + strconv.Itoa(worker_id))
+			if keys_tested % 1000 == 0 {
+				fmt.Println("Worker " + str_id + " has tested " + strconv.Itoa(keys_tested) + " keys.")
 			}
 		}
 	}
@@ -52,16 +54,20 @@ func main() {
 
 	fmt.Println("Key generation finished.  Starting worker threads to test...")
 
-	var partition_1 = 3960458
-	var partition_2 = 7920917
+	batch_size := 300000
+	var batches [][]string
 
-	var wait_group sync.WaitGroup
-	wait_group.Add(3)
+	for batch_size < len(keys) {
+		keys, batches = keys[batch_size:], append(batches, keys[0:batch_size:batch_size])
+	}
 
-	go test_keys(keys[0:partition_1], 0)
-	go test_keys(keys[partition_1+1:partition_2], 1)
-	go test_keys(keys[partition_2+1:len(keys)], 2)
+	batches = append(batches, keys)
 
-	wait_group.Wait()
+	for i, partition := range batches {
+		go test_keys(partition, i, completion_bus)
+	}
+
+	the_key := <-completion_bus
+	fmt.Println("Program ending, correct key found: " + the_key)
 
 }
